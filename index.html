@@ -279,6 +279,35 @@ tbody tr:hover td{background:var(--card2)}
 @media(max-width:980px){.kpi-admin-grid{grid-template-columns:1fr}}
 @media(max-width:560px){.kpi-periodos{grid-template-columns:1fr}.kpi-periodo-col{border-right:none;border-bottom:1px solid var(--border-soft)}}
 
+
+.eq-card{background:var(--card);border:1px solid var(--border-soft);border-radius:16px;padding:20px 22px;box-shadow:var(--shadow);margin-bottom:18px}
+.eq-head{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:18px}
+.eq-titulo{font-size:13px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:1.2px}
+.eq-valor{font-family:'Playfair Display',serif;font-size:30px;font-weight:700;line-height:1}
+.eq-estado{font-size:12px;font-weight:700;padding:5px 13px;border-radius:20px}
+.eq-track-wrap{position:relative;padding-top:26px;padding-bottom:30px}
+.eq-track{position:relative;height:26px;background:var(--card2);border-radius:13px;overflow:visible;border:1px solid var(--border-soft)}
+.eq-fill{height:100%;border-radius:13px;transition:width 1.1s cubic-bezier(.34,1.56,.64,1)}
+.eq-mark{position:absolute;top:-26px;bottom:-30px;width:0;border-left:2px dashed var(--dim);z-index:2}
+.eq-mark.meta{border-left-color:var(--gold)}
+.eq-mark.equi{border-left-color:var(--rose)}
+.eq-mark-lbl{position:absolute;top:-24px;transform:translateX(-50%);font-size:9.5px;font-weight:700;white-space:nowrap;background:var(--card);padding:1px 6px;border-radius:6px;border:1px solid var(--border-soft)}
+.eq-mark-val{position:absolute;bottom:-28px;transform:translateX(-50%);font-size:10px;font-family:'DM Mono',monospace;color:var(--dim);white-space:nowrap}
+.eq-leyenda{display:flex;gap:18px;flex-wrap:wrap;font-size:11px;color:var(--dim);margin-top:4px}
+.eq-leyenda span{display:inline-flex;align-items:center;gap:6px}
+.eq-ld{width:11px;height:11px;border-radius:3px;display:inline-block}
+.sem4-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:6px}
+.sem4-card{background:var(--card2);border:1.5px solid var(--border-soft);border-radius:12px;padding:13px 15px;position:relative;overflow:hidden;transition:background .3s,border-color .3s}
+.sem4-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.sem4-nom{font-size:11px;font-weight:700;color:var(--ink);text-transform:uppercase;letter-spacing:.5px}
+.sem4-pct{font-family:'DM Mono',monospace;font-size:11px;font-weight:700}
+.sem4-val{font-family:'Playfair Display',serif;font-size:17px;font-weight:700;color:var(--ink);line-height:1;margin-bottom:3px}
+.sem4-meta{font-size:9.5px;color:var(--dim);font-family:'DM Mono',monospace;margin-bottom:8px}
+.sem4-bar{height:7px;background:#fff;border:1px solid rgba(0,0,0,.06);border-radius:4px;overflow:hidden}
+.sem4-fill{height:100%;border-radius:4px;transition:width 1s cubic-bezier(.34,1.56,.64,1)}
+.sem4-estado{font-size:10px;font-weight:700;margin-top:7px;display:flex;align-items:center;gap:5px}
+@media(max-width:680px){.sem4-grid{grid-template-columns:repeat(2,1fr)}}
+
 </style>
 </head><body>
 <div id="loginScreen">
@@ -339,6 +368,8 @@ tbody tr:hover td{background:var(--card2)}
     <main class="main">
     <div class="view active" id="view-resumen">
       <div class="metas-bar" id="metasResumen"></div>
+      <div class="eq-card" id="eqResumen"></div>
+      <div id="sem4Resumen"></div>
       <div class="resumen-header"><div class="trimestre-wrap"><span class="section-title" style="margin:0">Historial trimestre</span><div id="trimestreBar"></div></div></div>
       <div class="section-title">Ventas del mes</div>
       <div class="grid-4" id="kpiVentasRow1"></div>
@@ -397,6 +428,8 @@ tbody tr:hover td{background:var(--card2)}
         </div>
       </div>
       <div id="kpiSemaforoLeyenda" class="kpi-leyenda"></div>
+      <div class="eq-card" id="eqKpis"></div>
+      <div id="sem4Kpis" style="margin-bottom:18px"></div>
       <div id="kpiAdminGrid"></div>
     </div>
     <div class="view" id="view-historial">
@@ -461,7 +494,7 @@ function iniciarDashboard(){
 }
 
 var METAS = {
-  venta_bruta_mensual:101000000, venta_bruta_semanal:25000000, venta_bruta_diaria:3607000,
+  venta_bruta_mensual:101000000, venta_bruta_equilibrio:77000000, venta_bruta_semanal:25000000, venta_bruta_diaria:3607000,
   venta_neta_mensual:86000000, venta_neta_diaria:2850163,
   clientes_mensual:1261, clientes_semanal:315, clientes_diaria:45,
   ticket_promedio:80000,
@@ -549,6 +582,68 @@ function metaChip(label,val,meta,fmtFn){
   var color=pv>=1?'#1faf6b':pv>=.8?'#e8941a':'#e0495f';
   return '<div class="meta-chip"><div class="meta-chip-top"><span class="meta-chip-label">'+label+'</span><span class="meta-chip-pct" style="color:'+color+'">'+(pv*100).toFixed(0)+'%</span></div><div class="meta-chip-val">'+f(val)+'</div><div class="meta-chip-meta">Meta: '+f(meta)+'</div><div class="meta-chip-bar"><div class="meta-chip-fill" style="width:'+Math.min(pv*100,100)+'%;background:'+color+'"></div></div></div>';
 }
+function renderEquilibrio(elId,mes){
+  var el=document.getElementById(elId);
+  if(!el)return;
+  var mm=mes||selectedMes;
+  var d=filterMes(CIERRES,mm);
+  var vb=sumBy(d,'venta_bruta');
+  var equi=METAS.venta_bruta_equilibrio, meta=METAS.venta_bruta_mensual;
+  // escala: el maximo de la barra es la meta + 10% para dejar aire
+  var escala=meta*1.12;
+  var pct=Math.min(vb/escala*100,100);
+  var posEqui=equi/escala*100, posMeta=meta/escala*100;
+  // color segun donde estamos
+  var color, estado, estadoBg;
+  if(vb>=meta){color='#1faf6b';estado='META CUMPLIDA';estadoBg='rgba(31,175,107,.13)';}
+  else if(vb>=equi){color='#e8941a';estado='SOBRE EQUILIBRIO';estadoBg='rgba(232,148,26,.15)';}
+  else{color='#e0495f';estado='BAJO EQUILIBRIO';estadoBg='rgba(224,73,95,.13)';}
+  var faltaEqui=equi-vb, faltaMeta=meta-vb;
+  var sub;
+  if(vb>=meta) sub='Superaste la meta por '+fmt(vb-meta);
+  else if(vb>=equi) sub='Sobre el punto de equilibrio. Faltan '+fmt(faltaMeta)+' para la meta';
+  else sub='Faltan '+fmt(faltaEqui)+' para el punto de equilibrio';
+  var h='';
+  h+='<div class="eq-head"><div><div class="eq-titulo">Venta Bruta acumulada - '+NOMBRES_MES[mm]+'</div><div class="eq-valor" style="color:'+color+'">'+fmt(vb)+'</div></div>';
+  h+='<div style="text-align:right"><span class="eq-estado" style="color:'+color+';background:'+estadoBg+'">'+estado+'</span><div style="font-size:11px;color:var(--muted);margin-top:7px">'+sub+'</div></div></div>';
+  h+='<div class="eq-track-wrap"><div class="eq-track"><div class="eq-fill" style="width:'+pct+'%;background:'+color+'"></div>';
+  // marca equilibrio
+  h+='<div class="eq-mark equi" style="left:'+posEqui+'%"></div>';
+  h+='<div class="eq-mark-lbl" style="left:'+posEqui+'%;color:#e0495f">Equilibrio</div>';
+  h+='<div class="eq-mark-val" style="left:'+posEqui+'%">'+fmt(equi)+'</div>';
+  // marca meta
+  h+='<div class="eq-mark meta" style="left:'+posMeta+'%"></div>';
+  h+='<div class="eq-mark-lbl" style="left:'+posMeta+'%;color:#c79330">Meta</div>';
+  h+='<div class="eq-mark-val" style="left:'+posMeta+'%">'+fmt(meta)+'</div>';
+  h+='</div></div>';
+  h+='<div class="eq-leyenda"><span><span class="eq-ld" style="background:#e0495f"></span>Bajo equilibrio (&lt; '+fmt(equi)+')</span><span><span class="eq-ld" style="background:#e8941a"></span>Sobre equilibrio ('+fmt(equi)+' a '+fmt(meta)+')</span><span><span class="eq-ld" style="background:#1faf6b"></span>Meta cumplida (&ge; '+fmt(meta)+')</span></div>';
+  el.innerHTML=h;
+}
+function renderSemanas4(elId,mes){
+  var el=document.getElementById(elId);
+  if(!el)return;
+  var mm=mes||selectedMes;
+  var d=filterMes(CIERRES,mm);
+  var metaSem=METAS.venta_bruta_semanal;
+  var h='<div class="section-title">Cumplimiento por semana (meta '+fmt(metaSem)+' c/u)</div><div class="sem4-grid">';
+  for(var s=1;s<=4;s++){
+    var rows=d.filter(function(r){return r.semana===s;});
+    var vb=sumBy(rows,'venta_bruta');
+    var pv=metaSem>0?vb/metaSem:0;
+    var p=pv*100;
+    var color=p>=90?'#1faf6b':p>=70?'#e8941a':'#e0495f';
+    var bg=p>=90?'rgba(31,175,107,.10)':p>=70?'rgba(232,148,26,.12)':'rgba(224,73,95,.10)';
+    var estado=p>=90?'Cumplida':p>=70?'Cerca':'No cumple';
+    var icono=p>=90?'&#10003;':p>=70?'&#9888;':'&#10007;';
+    h+='<div class="sem4-card" style="background:'+bg+';border-color:'+color+'"><div class="sem4-top"><span class="sem4-nom">Semana '+s+'</span><span class="sem4-pct" style="color:'+color+'">'+(pv*100).toFixed(0)+'%</span></div>';
+    h+='<div class="sem4-val">'+fmt(vb)+'</div><div class="sem4-meta">Meta: '+fmt(metaSem)+'</div>';
+    h+='<div class="sem4-bar"><div class="sem4-fill" style="width:'+Math.min(pv*100,100)+'%;background:'+color+'"></div></div>';
+    h+='<div class="sem4-estado" style="color:'+color+'">'+icono+' '+estado+'</div></div>';
+  }
+  h+='</div>';
+  el.innerHTML=h;
+}
+
 function renderMetasBar(elId, periodo){
   // periodo: 'mes' | 'semana' (con numero) | 'dia' (con fecha)
   var el=document.getElementById(elId);
@@ -599,6 +694,7 @@ function kpiCard(o){var pv=o.meta?o.val/o.meta:null;var color=pv===null?'var(--d
 
 function initResumenCharts(){
   renderMetasBar("metasResumen",{tipo:"mes"});
+  renderEquilibrio("eqResumen");renderSemanas4("sem4Resumen");
   var d=filterMes(CIERRES,selectedMes),g=filterMes(GASTOS,selectedMes);if(!d.length)return;
   var totVB=sumBy(d,'venta_bruta'),totProp=sumBy(d,'propinas'),totIpo=sumBy(d,'ipoconsumo'),totVN=sumBy(d,'venta_neta'),totCli=sumBy(d,'clientes'),totAlmL=sumBy(d,'alm_local'),totAlmD=sumBy(d,'alm_dom'),totEjec=sumBy(d,'ejecutivos'),totGastos=sumBy(g,'valor');
   var tkRows=d.filter(function(r){return r.ticket_carta>0;}),avgTk=tkRows.length?sumBy(tkRows,'ticket_carta')/tkRows.length:0,avgDia=d.length?totVN/d.length:0;
@@ -744,6 +840,8 @@ function renderKPIsAdmin(){
     '<span><span class="kpi-ldot" style="background:#1faf6b"></span>En meta (100%+)</span>'+
     '<span><span class="kpi-ldot" style="background:#e8941a"></span>Cerca (80-99%)</span>'+
     '<span><span class="kpi-ldot" style="background:#e0495f"></span>No cumple (menos de 80%) - requiere accion</span>';
+  var _mesKpi=parseInt(fecha.slice(5,7),10);
+  renderEquilibrio('eqKpis',_mesKpi);renderSemanas4('sem4Kpis',_mesKpi);
   var dDia=datosPeriodo(fecha,'dia'),dSem=datosPeriodo(fecha,'semana'),dMes=datosPeriodo(fecha,'mes');
   var html='<div class="kpi-admin-grid">';
   html+=tarjetaKPI('&#128176;','Venta Bruta','Ventas totales segun POS','venta_bruta','venta_bruta',fmt,false,dDia,dSem,dMes);
@@ -839,32 +937,64 @@ function descargarKPIsPDF(){
     doc.setFont('helvetica','normal');doc.setTextColor(dim[0],dim[1],dim[2]);doc.text(f(meta),W-180,y,{align:'right'});
     doc.setTextColor(c[0],c[1],c[2]);doc.setFont('helvetica','bold');doc.text((pv*100).toFixed(0)+'%',W-100,y,{align:'right'});
     doc.text(cl==='bien'?'EN META':cl==='medio'?'CERCA':'NO CUMPLE',W-48,y,{align:'right'});y+=16;if(y>H-50){doc.addPage();y=48;}}
+  function metaPer(metaKey,suf){ if(metaKey==='ticket') return METAS.ticket_promedio; return METAS[metaKey+'_'+suf]; }
   function bloque(titulo,campo,metaKey,fFn,inverso){seccion(titulo);
-    filaKPI('Dia ('+fecha+')',dDia[campo],METAS[metaKey+'_diaria'],fFn,inverso);
-    filaKPI('Semana '+infoSem.sem+' del mes',dSem[campo],METAS[metaKey+'_semanal'],fFn,inverso);
-    filaKPI('Mes ('+fecha.slice(0,7)+')',dMes[campo],METAS[metaKey+'_mensual'],fFn,inverso);
+    filaKPI('Dia ('+fecha+')',dDia[campo],metaPer(metaKey,'diaria'),fFn,inverso);
+    filaKPI('Semana '+infoSem.sem+' del mes',dSem[campo],metaPer(metaKey,'semanal'),fFn,inverso);
+    filaKPI('Mes ('+fecha.slice(0,7)+')',dMes[campo],metaPer(metaKey,'mensual'),fFn,inverso);
     y+=8;}
   bloque('Venta Bruta','venta_bruta','venta_bruta',fmtFull,false);
   bloque('Clientes Menu Salon','clientes','clientes',fmtNum,false);
   bloque('Ticket Promedio','ticket','ticket',fmtFull,false);
   bloque('Ejecutivos','ejecutivos','ejecutivos',fmtNum,false);
   bloque('Control de Gastos (menos es mejor)','gastos','gastos',fmtFull,true);
-  // resumen / plan de accion
-  if(y>H-160){doc.addPage();y=48;}
-  seccion('Plan de accion sugerido');y-=8;
-  var alertas=[];
-  function chk(nombre,val,meta,inverso){var pv=meta>0?val/meta:0;var cl=estadoClase(pv,inverso);if(cl==='malo')alertas.push(nombre+' ('+(pv*100).toFixed(0)+'% de la meta del mes)');}
-  chk('Venta Bruta',dMes.venta_bruta,METAS.venta_bruta_mensual,false);
-  chk('Clientes',dMes.clientes,METAS.clientes_mensual,false);
-  chk('Ticket Promedio',dMes.ticket,METAS.ticket_promedio,false);
-  chk('Ejecutivos',dMes.ejecutivos,METAS.ejecutivos_mensual,false);
-  chk('Gastos',dMes.gastos,METAS.gastos_mensual,true);
-  doc.setTextColor(ink[0],ink[1],ink[2]);doc.setFont('helvetica','normal');doc.setFontSize(10);
-  var txt;
-  if(alertas.length===0){txt='Todos los indicadores del mes van en linea con las metas. Mantener el ritmo operativo actual y reforzar lo que esta funcionando.';}
-  else{txt='Indicadores que requieren atencion este mes: '+alertas.join('; ')+'. Se recomienda definir acciones concretas sobre estos puntos (promociones, control de costos, refuerzo de servicio o ajuste de turnos segun corresponda).';}
-  var ls=doc.splitTextToSize(txt,W-96);for(var i=0;i<ls.length;i++){if(y>H-50){doc.addPage();y=48;}doc.text(ls[i],48,y);y+=15;}
+  // ===== ANALISIS DETALLADO POR INDICADOR =====
+  function parrafoK(t){doc.setTextColor(ink[0],ink[1],ink[2]);doc.setFont('helvetica','normal');doc.setFontSize(10);var ls=doc.splitTextToSize(t,W-96);for(var i=0;i<ls.length;i++){if(y>H-50){doc.addPage();y=48;}doc.text(ls[i],48,y);y+=15;}y+=5;}
+  function bullK(t){if(y>H-50){doc.addPage();y=48;}doc.setTextColor(199,147,48);doc.setFont('helvetica','bold');doc.setFontSize(10);doc.text('>',48,y);doc.setTextColor(ink[0],ink[1],ink[2]);doc.setFont('helvetica','normal');var ls=doc.splitTextToSize(t,W-110);for(var i=0;i<ls.length;i++){doc.text(ls[i],62,y);y+=15;}y+=3;}
+  function pctTxt(v,m,inv){var pv=m>0?v/m:0;return (pv*100).toFixed(0)+'%';}
+  if(y>H-140){doc.addPage();y=48;}
+  seccion('Analisis detallado del mes');
+  var pVB=dMes.venta_bruta/METAS.venta_bruta_mensual;
+  var pCli=dMes.clientes/METAS.clientes_mensual;
+  var pTk=dMes.ticket/METAS.ticket_promedio;
+  var pEj=dMes.ejecutivos/METAS.ejecutivos_mensual;
+  var pGa=dMes.gastos/METAS.gastos_mensual;
+  // Venta bruta
+  var t1='Venta Bruta: el mes acumula '+fmtFull(dMes.venta_bruta)+' ('+(pVB*100).toFixed(0)+'% de la meta de '+fmtFull(METAS.venta_bruta_mensual)+'). El punto de equilibrio es '+fmtFull(METAS.venta_bruta_equilibrio)+'. ';
+  if(dMes.venta_bruta>=METAS.venta_bruta_mensual)t1+='La meta ya se cumplio: el negocio esta en zona de utilidad. ';
+  else if(dMes.venta_bruta>=METAS.venta_bruta_equilibrio)t1+='Se supero el punto de equilibrio (el negocio cubre sus costos), pero aun falta '+fmtFull(METAS.venta_bruta_mensual-dMes.venta_bruta)+' para la meta. ';
+  else t1+='Aun NO se alcanza el punto de equilibrio: faltan '+fmtFull(METAS.venta_bruta_equilibrio-dMes.venta_bruta)+' solo para cubrir costos. Es la prioridad del mes. ';
+  parrafoK(t1);
+  // Clientes vs ticket (diagnostico cruzado)
+  var t2='Clientes y Ticket: '+fmtNum(dMes.clientes)+' clientes ('+(pCli*100).toFixed(0)+'%) con ticket promedio de '+fmtFull(dMes.ticket)+' ('+(pTk*100).toFixed(0)+'%). ';
+  if(pCli<0.8 && pTk>=0.95)t2+='Diagnostico: viene poca gente pero gasta bien. La palanca de crecimiento es ATRAER MAS CLIENTES. ';
+  else if(pCli>=0.95 && pTk<0.9)t2+='Diagnostico: hay buen flujo de gente pero el ticket es bajo. La palanca es VENDER MAS POR MESA. ';
+  else if(pCli>=0.9 && pTk>=0.9)t2+='Diagnostico: buen equilibrio entre cantidad de clientes y valor por cliente. ';
+  else t2+='Diagnostico: tanto el flujo de clientes como el ticket estan por debajo de meta; conviene trabajar ambos frentes. ';
+  parrafoK(t2);
+  // Ejecutivos
+  var t3='Ejecutivos: '+fmtNum(dMes.ejecutivos)+' vendidos ('+(pEj*100).toFixed(0)+'% de la meta de '+fmtNum(METAS.ejecutivos_mensual)+', valida de lunes a viernes). ';
+  if(pEj>=1)t3+='Excelente desempeno del menu ejecutivo. ';
+  else if(pEj>=0.7)t3+='Va en camino; reforzar la difusion entre semana ayudaria a cerrar la brecha. ';
+  else t3+='Bajo; el menu ejecutivo es una palanca importante de clientes en horas de almuerzo entre semana. ';
+  parrafoK(t3);
+  // Gastos (inverso)
+  var t4='Control de Gastos: '+fmtFull(dMes.gastos)+' ('+(pGa*100).toFixed(0)+'% del tope de '+fmtFull(METAS.gastos_mensual)+'). ';
+  if(dMes.gastos<=METAS.gastos_mensual)t4+='Los gastos estan dentro del limite previsto, buen control. ';
+  else t4+='Los gastos superaron el tope del mes: revisar las categorias mas pesadas (cocina, nomina, turnos) y las compras no programadas. ';
+  parrafoK(t4);
+  // ===== PLAN DE ACCION CONCRETO =====
+  if(y>H-140){doc.addPage();y=48;}
+  seccion('Plan de accion sugerido');
+  var hizo=false;
+  if(pVB<1){bullK('Ventas: '+(dMes.venta_bruta<METAS.venta_bruta_equilibrio?'PRIORIDAD ALTA - aun no se cubre el punto de equilibrio. ':'')+'Activar promociones en los dias de menor venta e impulsar reservas y eventos.');hizo=true;}
+  if(pCli<0.8){bullK('Clientes: campana en redes y voz a voz; alianzas o domicilios para sumar trafico en horas valle.');hizo=true;}
+  if(pTk<0.9){bullK('Ticket: entrenar al equipo en venta sugerida (entradas, postres, vinos); revisar combos y carta de bebidas.');hizo=true;}
+  if(pEj<0.8){bullK('Ejecutivos: reforzar la difusion del menu ejecutivo de lunes a viernes (carteleria, redes, clientes de oficinas cercanas).');hizo=true;}
+  if(dMes.gastos>METAS.gastos_mensual){bullK('Gastos: auditar compras no programadas y ajustar turnos al flujo real; confirmar que los pagos por transferencia esten autorizados por Samuel.');hizo=true;}
+  if(!hizo)bullK('Todos los indicadores del mes van en linea con las metas. Mantener el ritmo y documentar que practicas estan funcionando para sostenerlas.');
   doc.setTextColor(dim[0],dim[1],dim[2]);doc.setFont('helvetica','normal');doc.setFontSize(7.5);
+  if(y>H-30){doc.addPage();y=48;}
   doc.text('Dashboard Montana - Generado '+new Date().toLocaleString('es-CO'),40,H-24);
   doc.save('KPIs_Montana_'+fecha+'.pdf');
   toast('Informe de KPIs descargado','success');
@@ -987,6 +1117,27 @@ function descargarInformeContable(){
   var cumpleVN=vNeta>=METAS.venta_neta_mensual;
   parrafo('Cumplimiento de meta de venta neta: '+(cumpleVN?'CUMPLIDA':'NO cumplida ('+(vNeta/METAS.venta_neta_mensual*100).toFixed(0)+'% de la meta mensual)')+'. Ticket promedio real de '+fmtFull(ticketReal)+' frente a meta de '+fmtFull(METAS.ticket_promedio)+'.');
 
+  // ===== 9. RECOMENDACIONES CONCRETAS =====
+  function bullR(t){if(y>H-50){doc.addPage();y=48;}doc.setTextColor(199,147,48);doc.setFont('helvetica','bold');doc.setFontSize(10);doc.text('>',48,y);doc.setTextColor(ink[0],ink[1],ink[2]);doc.setFont('helvetica','normal');var ls=doc.splitTextToSize(t,W-110);for(var i=0;i<ls.length;i++){doc.text(ls[i],62,y);y+=15;}y+=3;}
+  seccion('9. Recomendaciones concretas');
+  var pVBm=vBruta/METAS.venta_bruta_mensual;
+  var pClim=cli/METAS.clientes_mensual;
+  var pTkm=ticketReal/METAS.ticket_promedio;
+  // Equilibrio / ventas
+  if(vBruta<METAS.venta_bruta_equilibrio)bullR('PRIORIDAD ALTA: la venta bruta ('+fmtFull(vBruta)+') no alcanzo el punto de equilibrio ('+fmtFull(METAS.venta_bruta_equilibrio)+'). Enfocar el proximo periodo en aumentar ventas antes que en cualquier otra cosa.');
+  else if(vBruta<METAS.venta_bruta_mensual)bullR('La venta supero el equilibrio pero no la meta. Impulsar eventos, reservas y promociones en dias flojos para cerrar la brecha de '+fmtFull(METAS.venta_bruta_mensual-vBruta)+'.');
+  else bullR('Meta de venta superada. Documentar que estrategias funcionaron para sostener el resultado.');
+  // Diagnostico cliente/ticket
+  if(pClim<0.8 && pTkm>=0.95)bullR('Atraer mas clientes: el ticket es bueno pero el flujo es bajo. Invertir en difusion (redes, voz a voz, alianzas).');
+  else if(pClim>=0.95 && pTkm<0.9)bullR('Subir el ticket: hay buen flujo pero gastan poco por mesa. Venta sugerida de entradas, postres y vinos; revisar combos.');
+  // Costos
+  if(vNeta>0 && cocina/vNeta>METAS.pct_cocina)bullR('Costo de cocina por encima de la meta ('+(METAS.pct_cocina*100)+'%): revisar proveedores, porciones y desperdicio.');
+  if(vNeta>0 && turnos/vNeta>METAS.pct_nomina)bullR('Nomina y turnos por encima de la meta ('+(METAS.pct_nomina*100)+'%): ajustar la programacion de turnos al flujo real de clientes.');
+  if(totGastos>METAS.gastos_mensual)bullR('Gastos totales sobre el tope del mes: auditar compras no programadas y confirmar que los pagos por transferencia tengan autorizacion de Samuel.');
+  // Auditoria / caja
+  if(Math.abs(difPago)>1000)bullR('Hay una diferencia de '+fmtFull(difPago)+' entre los medios de pago y la venta bruta: revisar el manejo de caja y la conciliacion del periodo.');
+  bullR('Realizar la auditoria de cierre del periodo verificando efectivo, base de caja menor y separacion de propinas, segun el procedimiento establecido.');
+
   // tabla diaria
   doc.addPage();y=48;header('DETALLE DIARIO');
   seccion('Cierres del periodo');
@@ -1060,9 +1211,47 @@ function descargarCierrePDF(){
   doc.text('Total gastos',48,y);doc.text(fmtFull(totG),W-48,y,{align:'right'});y+=20;
   var margen=vn-totG;
   doc.setTextColor(margen>=0?31:224,margen>=0?175:73,margen>=0?107:95);
-  doc.text('Margen del dia (V-G)',48,y);doc.text(fmtFull(margen),W-48,y,{align:'right'});
+  doc.text('Margen del dia (V-G)',48,y);doc.text(fmtFull(margen),W-48,y,{align:'right'});y+=8;
+  // ----- ANALISIS Y ESTRATEGIAS (medio) -----
+  function parrafoC(t){doc.setTextColor(ink[0],ink[1],ink[2]);doc.setFont('helvetica','normal');doc.setFontSize(10);var ls=doc.splitTextToSize(t,W-96);for(var i=0;i<ls.length;i++){if(y>790){doc.addPage();y=48;}doc.text(ls[i],48,y);y+=15;}y+=4;}
+  function bullC(t){if(y>790){doc.addPage();y=48;}doc.setTextColor(199,147,48);doc.setFont('helvetica','bold');doc.setFontSize(10);doc.text('>',48,y);doc.setTextColor(ink[0],ink[1],ink[2]);doc.setFont('helvetica','normal');var ls=doc.splitTextToSize(t,W-110);for(var i=0;i<ls.length;i++){doc.text(ls[i],62,y);y+=15;}y+=2;}
+  if(y>660){doc.addPage();y=48;}
+  y+=8;seccion('Analisis del dia');
+  var pvVB=METAS.venta_bruta_diaria>0?vb/METAS.venta_bruta_diaria:0;
+  var pvCli=METAS.clientes_diaria>0&&d?d.clientes/METAS.clientes_diaria:0;
+  var tkDia=d&&d.ticket_carta?d.ticket_carta:0;
+  var pvTk=METAS.ticket_promedio>0?tkDia/METAS.ticket_promedio:0;
+  // Ventas
+  var aVent='Ventas: la venta bruta del dia fue de '+fmtFull(vb)+', equivalente al '+(pvVB*100).toFixed(0)+'% de la meta diaria ('+fmtFull(METAS.venta_bruta_diaria)+'). ';
+  if(pvVB>=1)aVent+='Se super\u00f3 la meta del dia, un resultado muy positivo. ';
+  else if(pvVB>=0.7)aVent+='Estuvo cerca de la meta; con un peque\u00f1o impulso se alcanza. ';
+  else aVent+='Estuvo por debajo de lo esperado, conviene revisar qu\u00e9 factor\u00f3 (clima, d\u00eda de semana, flujo). ';
+  parrafoC(aVent);
+  // Clientes y ticket
+  var aCli='Clientes y ticket: se atendieron '+(d?d.clientes:0)+' clientes ('+(pvCli*100).toFixed(0)+'% de la meta de '+METAS.clientes_diaria+'), con un ticket promedio de '+(tkDia?fmtFull(tkDia):'sin dato')+' (meta '+fmtFull(METAS.ticket_promedio)+'). ';
+  if(pvCli<0.7 && pvTk>=1)aCli+='Vino poca gente pero cada cliente gast\u00f3 bien: el reto del dia fue atraer m\u00e1s personas. ';
+  else if(pvCli>=1 && pvTk<0.9)aCli+='Hubo buen flujo de gente pero el ticket fue bajo: la oportunidad est\u00e1 en vender m\u00e1s por mesa. ';
+  else if(pvCli>=0.9 && pvTk>=0.9)aCli+='Buen equilibrio entre cantidad de clientes y valor por cliente. ';
+  else aCli+='Tanto el flujo como el ticket tienen espacio de mejora. ';
+  parrafoC(aCli);
+  // Gastos y margen
+  var aGas='Gastos y margen: los gastos del dia sumaron '+fmtFull(totG)+' ('+(vn>0?(totG/vn*100).toFixed(0):'0')+'% de la venta neta), dejando un margen de '+fmtFull(margen)+'. ';
+  if(margen<0)aGas+='El dia cerr\u00f3 en p\u00e9rdida: es prioritario revisar los gastos de la jornada. ';
+  else if(vn>0 && totG/vn>0.85)aGas+='El nivel de gasto fue alto respecto a la venta; vale la pena revisar compras y turnos. ';
+  else aGas+='La relaci\u00f3n gasto-venta del dia se mantuvo en un rango sano. ';
+  parrafoC(aGas);
+  // Estrategias
+  if(y>700){doc.addPage();y=48;}
+  y+=4;seccion('Estrategias sugeridas');
+  if(pvVB<0.7)bullC('Reforzar la atracci\u00f3n de clientes en dias flojos: promocion puntual, redes sociales o voz a voz con clientes frecuentes.');
+  if(pvTk<0.9 && tkDia>0)bullC('Subir el ticket: que el equipo sugiera entradas, postres o una copa de vino; revisar combos o recomendaciones del mesero.');
+  if(pvCli<0.7)bullC('Activar el menu ejecutivo y domicilios entre semana para sumar mas clientes en horas valle.');
+  if(vn>0 && totG/vn>0.85)bullC('Revisar los gastos del dia: validar compras no programadas y ajustar turnos al flujo real esperado.');
+  if(margen>=0 && pvVB>=1)bullC('Dia destacado: identificar que funciono (evento, clima, promocion) para repetirlo.');
+  bullC('Registrar en Observaciones cualquier hecho relevante del dia para explicar estos numeros en el cierre.');
   doc.setTextColor(dim[0],dim[1],dim[2]);doc.setFont('helvetica','normal');doc.setFontSize(8);
-  doc.text('Generado por Dashboard Montana - '+new Date().toLocaleString('es-CO'),40,820);
+  if(y>800){doc.addPage();y=48;}
+  doc.text('Generado por Dashboard Montana - '+new Date().toLocaleString('es-CO'),40,Math.min(y+10,820));
   doc.save('Cierre_Montana_'+fecha+'.pdf');
   toast('PDF descargado','success');
 }
